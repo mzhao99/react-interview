@@ -21,7 +21,7 @@ function handleOnClick(url: string) {
 export function RepositoryOption(props: Props) {
   return (
     <Combobox.Option
-      value={'repository_name'}
+      value={props.repository.id}
       className={({ active }) =>
         classNames(
           'flex flex-col cursor-default select-none justify-center px-4 py-2 space-y-1.5',

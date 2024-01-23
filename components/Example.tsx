@@ -20,6 +20,23 @@ type Repository = {
 
 type APIResponse = { items: Repository[] }
 
+// fetch data from api
+async function fetchRepositoryData(query: string): Promise<Repository[]> {
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+
+      const data: APIResponse = await response.json()
+    //   console.log(data.items[0].name)
+      return data.items
+    } catch (error) {
+      console.log("Error", error)
+      return []
+    }
+  }  
+
 export default function Example() {
   const [open, setOpen] = React.useState(true)
 
@@ -33,6 +50,23 @@ export default function Example() {
 
   const [rawQuery, setRawQuery] = React.useState('')
   const query = rawQuery.toLowerCase().replace(/^[#>]/, '')
+  const [searchResult, setSearchResult] = React.useState<Repository[]>([])
+
+  async function handleSearch() {
+    try {
+      const results = await fetchRepositoryData(query);
+      setSearchResult(results);
+    //   console.log("handle search function called")
+    } catch (error) {
+      console.log('Error', error);
+    }
+  }
+
+  function handleKeyDown(event:any) {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  }
 
   return (
     <Transition.Root
@@ -71,6 +105,7 @@ export default function Example() {
                   console.info('You have selected', item)
                 }}
               >
+                {/* Search box */}
                 <div className="relative">
                   <MagnifyingGlassIcon
                     className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-500"
@@ -80,9 +115,10 @@ export default function Example() {
                     className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-100 placeholder-gray-500 focus:ring-0 sm:text-sm focus:outline-0"
                     placeholder="Search GitHub repos..."
                     onChange={(event) => setRawQuery(event.target.value)}
+                    onKeyDown={handleKeyDown}
                   />
                 </div>
-
+                {/* Search results */}
                 <Combobox.Options
                   static
                   className="max-h-80 scroll-py-10 scroll-pb-2 space-y-4 overflow-y-auto p-4 pb-2"

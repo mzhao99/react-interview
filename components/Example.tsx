@@ -3,7 +3,7 @@ import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { RepositoryOption } from './RepositoryOption'
 import { FaceSmileIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 
-type Repository = {
+export type Repository = {
   id: string
   name: string
   full_name: string
@@ -16,6 +16,7 @@ type Repository = {
     login: string
     avatar_url: string
   }
+  html_url: string
 }
 
 type APIResponse = { items: Repository[] }
@@ -23,19 +24,18 @@ type APIResponse = { items: Repository[] }
 // fetch data from api
 async function fetchRepositoryData(query: string): Promise<Repository[]> {
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
 
-      const data: APIResponse = await response.json()
-    //   console.log(data.items[0].name)
-      return data.items
+        const data: APIResponse = await response.json()
+        return data.items
     } catch (error) {
-      console.log("Error", error)
-      return []
+        console.log("Error", error)
+        return []
     }
-  }  
+}  
 
 export default function Example() {
   const [open, setOpen] = React.useState(true)
@@ -51,14 +51,15 @@ export default function Example() {
   const [rawQuery, setRawQuery] = React.useState('')
   const query = rawQuery.toLowerCase().replace(/^[#>]/, '')
   const [searchResult, setSearchResult] = React.useState<Repository[]>([])
+  const [hasSearched, setHasSearched] = React.useState(false)
 
   async function handleSearch() {
     try {
-      const results = await fetchRepositoryData(query);
-      setSearchResult(results);
-    //   console.log("handle search function called")
+        const results = await fetchRepositoryData(query);
+        setSearchResult(results);
+        setHasSearched(true)
     } catch (error) {
-      console.log('Error', error);
+        console.log('Error', error);
     }
   }
 
@@ -119,7 +120,7 @@ export default function Example() {
                   />
                 </div>
                 {/* Search results */}
-                <Combobox.Options
+                {hasSearched && <Combobox.Options
                   static
                   className="max-h-80 scroll-py-10 scroll-pb-2 space-y-4 overflow-y-auto p-4 pb-2"
                 >
@@ -128,12 +129,10 @@ export default function Example() {
                       Repositories
                     </h2>
                     <ul className="-mx-4 mt-2 text-sm text-gray-700 space-y-0.5">
-                      <RepositoryOption />
-                      <RepositoryOption />
-                      <RepositoryOption />
+                      <RepositoryOption repository={searchResult[0]}/>
                     </ul>
                   </li>
-                </Combobox.Options>
+                </Combobox.Options>}
                 <span className="flex flex-wrap items-center bg-slate-900/20 py-2.5 px-4 text-xs text-gray-400">
                   <FaceSmileIcon className="w-4 h-4 mr-1" />
                   Welcome to Zolplay&apos;s React Interview Challenge.

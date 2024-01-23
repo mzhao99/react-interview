@@ -129,7 +129,9 @@ export default function Example() {
                       Repositories
                     </h2>
                     <ul className="-mx-4 mt-2 text-sm text-gray-700 space-y-0.5">
-                      <RepositoryOption repository={searchResult[0]}/>
+                        {searchResult.map((repo, index) => (
+                            <RepositoryOption key={index} repository={repo} />
+                        ))}
                     </ul>
                   </li>
                 </Combobox.Options>}
